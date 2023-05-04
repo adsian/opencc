@@ -1,7 +1,6 @@
 package opencc
 
 import (
-	"os"
 	"bufio"
 	"strings"
 )
@@ -10,8 +9,6 @@ const (
 	TYPE_OCD   = "ocd"
 	TYPE_GROUP = "group"
 )
-
-var dataDir string
 
 type FileOCD string
 
@@ -53,7 +50,6 @@ func (cv *ConversionChain) init() error {
 	return cv.Dict.init()
 }
 
-//
 func (d *Dict) init() (err error) {
 	if len(d.File) > 0 {
 		d.CfgMap, d.maxLen, d.minLen, err = d.File.readFile()
@@ -74,18 +70,17 @@ func (d *Dict) init() (err error) {
 	return nil
 }
 
-//
 func (fo *FileOCD) readFile() (map[string][]string, int, int, error) {
-	fileName := dataDir + "/dictionary/" + string(*fo)
-	f, err := os.Open(fileName)
+	fileName := "data/dictionary/" + string(*fo)
+	fs, err := f.Open(fileName)
 	if err != nil {
 		return nil, 0, 0, err
 	}
 	cfgMap := make(map[string][]string)
-	buf := bufio.NewReader(f)
+	buf := bufio.NewReader(fs)
 	//
-	max := 0;
-	min := 0;
+	max := 0
+	min := 0
 	//
 	for {
 		line, err := buf.ReadString('\n')
@@ -106,7 +101,7 @@ func (fo *FileOCD) readFile() (map[string][]string, int, int, error) {
 	return cfgMap, max, min, nil
 }
 
-//=============================================================
+// =============================================================
 func (c *Config) convertText(text string) (string, error) {
 	var err error
 	for _, cv := range c.ConversionChain {
@@ -126,7 +121,6 @@ func (c *ConversionChain) convertText(text string) (string, error) {
 	return text, nil
 }
 
-//
 func (d *Dict) convertTextWithMap(text string) (string, error) {
 	var err error
 	newText := text
@@ -137,7 +131,7 @@ func (d *Dict) convertTextWithMap(text string) (string, error) {
 			return text, nil
 		}
 		//
-		maxL := d.maxLen;
+		maxL := d.maxLen
 		if maxL > len(runes) {
 			maxL = len(runes)
 		}
@@ -147,10 +141,10 @@ func (d *Dict) convertTextWithMap(text string) (string, error) {
 				if i == 0 || j+i > len(runes) {
 					continue
 				}
-				old := string(runes[j:j+i]);
+				old := string(runes[j : j+i])
 				if newStr, ok := d.CfgMap[old]; ok {
 					newText = strings.Replace(newText, old, newStr[0], 1)
-					j = j + i - 1;
+					j = j + i - 1
 				}
 			}
 		}
